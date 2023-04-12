@@ -494,8 +494,3 @@ pic %>%
 
 ## just as a comment: the visualisation of the population distribution would look much nicer, if the area was larger
 ## but I chose this small area to decrease the computing time
-
-
-
-
-
