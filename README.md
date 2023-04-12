@@ -1,4 +1,4 @@
-# Affected Population Density Analysis by Flood in 2021 in Australia
+# Analysis of Affected Population Density by Flood in 2021 in Australia
 
 ## Information
 Please download the data from the Google Drive link and load the data into the script at the corresponding passages by adjusting the path to your directory. More explanations regarding the performed workflow can be find as comments in the script.
