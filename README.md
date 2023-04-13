@@ -3,6 +3,8 @@
 ## Information
 Please download the data from the Google Drive link and load the data into the script at the corresponding passages by adjusting the path to your directory. More explanations regarding the performed workflow can be find as comments in the script.
 
+Link: https://drive.google.com/drive/folders/1MiRumfNzds_3kBxjXp3uiFZIfbhcFvL2?usp=sharing
+
 ## Analysis & Results
 This project compares different techniques to extract the inundated area, to calculate the percentage of affected people in the study area and to display the population affected by this flood in R. The aim is to identify areas with the highest concentration of affected people and to show the impact the flood has on this population in the specific area regarding its severity.
 
