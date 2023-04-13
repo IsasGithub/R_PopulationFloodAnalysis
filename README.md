@@ -12,8 +12,10 @@ The results can be compared by plotting each mask over the original satellite im
 
 ![Mask](Figures/Mask.png)
 
-The MNDWI-mask is chosen and used for the population analysis with Rayshader based on population density data from 2020. Unfortunately, there was no feasible population data of the exact same year as the flood happens available, hence, it is not certain, that the resulting image represents the true situation. Nonetheless, the script shows the workflow to perform the population density analysis and visualisation. 
-
-The result is a PNG-image displaying, adding shadows for three-dimensionality as well as supportive text. 
+The MNDWI-mask is chosen and used for the population analysis with Rayshader based on population density data from 2020. Rayshader offers many visualisation options. The result is a PNG-image displaying the distribution of the affected population with shadows for three-dimensionality as well as supportive text. 
 
 ![image_git](Figures/image_git.png)
+
+## Discussion
+Unfortunately, there was no feasible population data of the exact same year as the flood happens available, hence, it is not certain, that the resulting image represents the true situation. Besides, the final image would look much better if it represented a larger area.
+Nonetheless, the script shows the workflow to perform the population density analysis and visualisation. 
