@@ -10,15 +10,11 @@ This project compares different techniques to extract the inundated area, to cal
 
 First, the inundated area needs to be extracted. An effective and fast approach is masking the flooded area by thresholding like the Normalized Difference Water Index (NDWI), using the green and near infrared band, or the Modified Normalized Difference Water Index (MNDWI), using the green and the shortwave infrared band. The result will be the inundated areas based on the threshold value ("0") represented in a binary mask. This threshold will mask out the values smaller than zero, which are all values not representing water surface (0,2-1) or flooding/humidity (0-0,2). Another feasible method is doing a supervised classification of the Landsat scene and extracting the pixels classified as water. 
 
-The results can be compared by plotting each mask over the original satellite image and by determining which approach represented the flood the best. As it can be seen in the images below, the MNDWI approach showed the clearest identification of the water areas.
+The results can be compared by plotting each mask over the original satellite image and by determining which approach represented the flood the best. The MNDWI approach showed the clearest identification of the water areas.
 
+![maskmw](Figures/Mask.png)
 
-|NDWI - Water Mask               |MNDWI - Water Mask              |Classification - Water Mask        |
-|:------------------------------:|:------------------------------:|:----------------------------------|
-|  ![mas](Figures/NdwiMask.png)  |  ![maskmw](Figures/Mask.png)   |  ![mask](Figures/ClassiMask.png)  |
-
-
-The MNDWI-mask is chosen and used for the population analysis with Rayshader based on population density data from 2020. Rayshader offers many visualisation options. The result is a PNG-image displaying the distribution of the affected population with shadows for three-dimensionality as well as supportive text. 
+This mask is chosen and used for the population analysis with Rayshader based on population density data from 2020. Rayshader offers many visualisation options. The result is a PNG-image displaying the distribution of the affected population with shadows for three-dimensionality as well as supportive text. 
 
 ![image_git](Figures/image_git.png)
 
