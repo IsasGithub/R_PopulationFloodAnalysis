@@ -13,9 +13,9 @@ First, the inundated area needs to be extracted. An effective and fast approach 
 The results can be compared by plotting each mask over the original satellite image and by determining which approach represented the flood the best. As it can be seen in the images below, the MNDWI approach showed the clearest identification of the water areas.
 
 
-|      MNDWI - Water Mask      |       NDWI - Water Mask        |  Classification - Water Mask  |
-|:----------------------------:|:------------------------------:|:------------------------------|
-| ![mask](Figures/Mask.png)    | ![mask](Figures/NdwiMask.png)  |![mask](Figures/ClassiMask.png)|
+|       NDWI - Water Mask       |       MNDWI - Water Mask        |  Classification - Water Mask  |
+|:------------------------------:|:------------------------------:|:------------------------------|
+|  ![mask](Figures/NdwiMask.png)     | ![mask](Figures/Mask.png)  |![mask](Figures/ClassiMask.png)|
 
 
 The MNDWI-mask is chosen and used for the population analysis with Rayshader based on population density data from 2020. Rayshader offers many visualisation options. The result is a PNG-image displaying the distribution of the affected population with shadows for three-dimensionality as well as supportive text. 
