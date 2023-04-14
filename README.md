@@ -13,7 +13,7 @@ First, the inundated area needs to be extracted. An effective and fast approach 
 The results can be compared by plotting each mask over the original satellite image and by determining which approach represented the flood the best. As it can be seen in the images below, the MNDWI approach showed the clearest identification of the water areas.
 
 
-|       NDWI - Water Mask       |       MNDWI - Water Mask        |  Classification - Water Mask  |
+|       NDWI - Water Mask       |       MNDWI - Water Mask        |    Classification - Water Mask|
 |:------------------------------:|:------------------------------:|:------------------------------|
 |  ![mask](Figures/NdwiMask.png)     | ![mask](Figures/Mask.png)  |![mask](Figures/ClassiMask.png)|
 
