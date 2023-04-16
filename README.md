@@ -14,7 +14,7 @@ The results can be compared by plotting each mask over the original satellite im
 
 ![maskmw](Figures/Mask.png)
 
-This mask is chosen and used for the population analysis with Rayshader based on population density data from 2020. Rayshader offers many visualisation options. The result is a PNG-image displaying the distribution of the affected population (pixel unit: number of people per square kilometer) with shadows for three-dimensionality as well as supportive text. 
+This mask is chosen and used for the population analysis with Rayshader based on population density data from 2020. Rayshader offers many visualisation options. The result is a PNG-image displaying the distribution of the affected population with shadows for three-dimensionality as well as supportive text. The pixel unit is the number of people per square kilometer. The higher and darker the elevation of the pixel, the more dense is the population.
 
 ![image_git](Figures/image_git.png)
 
