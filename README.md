@@ -6,7 +6,7 @@ Please download the data from the Google Drive link and load the data into the s
 Link: https://drive.google.com/drive/folders/1MiRumfNzds_3kBxjXp3uiFZIfbhcFvL2?usp=sharing
 
 ## Analysis & Results
-This project compares different techniques to extract the inundated area, to calculate the percentage of affected people in the study area and to display the population affected by this flood in R. The aim is to identify areas with the highest concentration of affected people and to show the impact the flood has on this population in the specific area regarding its severity.
+This project compares different techniques to extract the inundated area, it calculates the percentage of affected people in the study area and displays the population affected by this flood in R. The aim is to identify areas with the highest concentration of affected people and to show the impact the flood has on this population in the specific area regarding its severity.
 
 First, the inundated area needs to be extracted. An effective and fast approach is masking the flooded area by thresholding like the Normalized Difference Water Index (NDWI), using the green and near infrared band, or the Modified Normalized Difference Water Index (MNDWI), using the green and the shortwave infrared band. The result will be the inundated areas based on the threshold value ("0") represented in a binary mask. This threshold will mask out the values smaller than zero, which are all values not representing water surface (0,2-1) or flooding/humidity (0-0,2). Another feasible method is doing a supervised classification of the Landsat scene and extracting the pixels classified as water. 
 
