@@ -47,9 +47,6 @@ NIR <- sat[[5]]
 # The layout( ) function has the form layout(mat) where mat is a matrix object specifying the location of the figures
 nf <- layout(matrix(c(1,2), 1,2, byrow = TRUE))
 
-plot(green, main="Green Band")
-plot(NIR, main="NIR Band")
-
 ## NDWI
 ndwi = (green-NIR)/(green+NIR)
 
