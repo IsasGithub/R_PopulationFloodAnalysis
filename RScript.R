@@ -22,7 +22,7 @@ studyarea <-  raster::shapefile("D:/DATEN ZWEI/Wue/WS22_23/IntroductionToProgram
 
 sat_large <- brick("D:/DATEN ZWEI/Wue/WS22_23/IntroductionToProgramming/Assignment/FloodPopulation/Data/LC08_L2SP_090083_20210323_20210402_02_T1.tif")
 bands <- c("SR_B1", "SR_B2", "SR_B3", "SR_B4", "SR_B5", "SR_B6", "SR_B7")
-names(sat_large) <- bands
+names(sat_large) <- bands # assigns vector bands to column names of sattelite image
 
 
 # crop raster to study area
@@ -32,7 +32,7 @@ sat <- crop(sat_large, studyarea)
 
 
 ## CLASSIFY & EXTRACT WATER/FLOODED AREA USING INDICES
-## The NDWI and the modified NDWI are good and helpful methods to classify and
+## The NDWI and the modified NDWI is a good and helpful tool to classify and
 ## extract water in satellite images and a (faster) alternative to the normal classification
 
 
@@ -44,7 +44,7 @@ green <- sat[[3]]
 # Band NIR (B5)
 NIR <- sat[[5]]
 
-# The layout function has the form layout(mat) whit a matrix object specifying the location of the figures
+# The layout( ) function has the form layout(mat) where mat is a matrix object specifying the location of the figures
 nf <- layout(matrix(c(1,2), 1,2, byrow = TRUE))
 
 plot(green, main="Green Band")
@@ -55,6 +55,7 @@ ndwi = (green-NIR)/(green+NIR)
 
 # define a threshold to mask out the values smaller than 0 -> are non-water (0,2 – 1 –> Water surface,
 # 0.0 – 0,2 – Flooding, humidity) -> that's the extracted water area
+# calc applys the function to each pixel of ndwi. x = pixel value
 ndwi_water <- calc(ndwi, function(x){x[x < 0] <- NA;return(x)})
 
 # plot results
@@ -64,6 +65,7 @@ par(mfrow=c(1,3))
 plot(ndwi, main="NDWI")
 plot(ndwi_water, main="NDWI - Water pixels")
 
+# Sets breaks and color ramp (col=pal(2) 2 to use two colours)
 cuts=c(-1, 0, 1)
 pal= colorRampPalette(c("black", "white"))
 plot(ndwi, breaks=cuts, col=pal(2), main= "NDWI - Water mask")
@@ -111,7 +113,7 @@ plotRGB(sat, r = 5, g = 6, b = 4)
 plot(mndwi_water, add = TRUE, legend = FALSE)
 title(main = "Sat. image & MNDWI Water Area")
 
-# it can be seen, that the normal ndwi had a little more misclassified pixels, a little too many "holes"
+# it can be seen, that the normal ndwi had a little more misclassified pixels/a little too many "holes"
 # and the analysis with the mndwi achieved better results
 
 # only display the flood area
@@ -123,12 +125,14 @@ plot(mndwi_water, col = "blue", legend = FALSE, axes = FALSE, box = FALSE)
 ### COMPARISON WITH SUPERVISED CLASSIFICATION RESULT - Which method detects the water area better?
 # a typical approach to detect and classify different landcover classes is the supervised classification of a raster
 # image, for which training samples are needed. Here I will just run quickly a classification to find out, which approach
-# can better detect the flooded area
+# will get the better result, can better detect the flooded area
 
 
 file_samples <- "TD.gpkg"
+# if training data file_samples doesn't exist, collect samples
 if(!file.exists(file_samples)){
   # sampling:
+  # maxpixels limits the number of pixels displayed in mapview
   # water
   water <- drawFeatures(
     map = mapview(mndwi, maxpixels = 1000000)
@@ -158,6 +162,7 @@ if(!file.exists(file_samples)){
 
 
   # codify landuse
+  # class lable attribute is created and assigned an integer code for each class using mapvalues
   labeled_poly <- rbind(water, vegetation, herbeceous, urban)
   labeled_poly$classid <- as.numeric(
     plyr::mapvalues(labeled_poly$landuse,
@@ -165,77 +170,87 @@ if(!file.exists(file_samples)){
                     to = 1:length(unique(labeled_poly$landuse)))
   )
 
-  # save the training data
+  # save training data
   st_write(labeled_poly, "D:/DATEN ZWEI/Wue/WS22_23/IntroductionToProgramming/Assignment/FloodPopulation/TD.gpkg")
 }else{
   labeled_poly <- st_read(file_samples)
 }
 
-# load the polygons
+# load polygon and match crs so it has the same as sat image
 labeled_poly <- st_transform(labeled_poly, st_crs(sat))
 
-# for numeric response variable
+#  extracts the class ID from labeled_poly and assigns it to a new variable called resp_var
 labeled_poly$classid
 labeled_poly$resp_var <- labeled_poly$classid
 
-# save lables to randomly selected points to get labled features
+# to get labeled features, we need points to extract features for
+# loop creates points for sampling and assigns them to a list called labeled_points
+# size sets number of points sampled for each class
 labeled_points <- list()
 for(i in unique(labeled_poly$resp_var)){
-  message(paste0("Sampling points with resp_var=", i))
+  message(paste0("Sampling points from polygons with resp_var=", i))
 
-  # sample points with resp_var = i
-  labeled_points[[i]] <- st_sample(
+    labeled_points[[i]] <- st_sample(
     x = labeled_poly[labeled_poly$resp_var == i,],
     size = 100
   )
+    # convert to sf object
+    # labeled_points[[i]] refers to the list item containing the sampled points for a particular class
   labeled_points[[i]] <- st_as_sf(labeled_points[[i]])
+    # assigns the class ID i to the resp_var column of the sf object for the corresponding class.
+    # it links the sampled points to their respective classes -> to be used as the response variable in the classification model
   labeled_points[[i]]$resp_var <- i
 }
+# combine the list of sampled points for each class into a single sf object labeled_points
 labeled_points <- do.call(rbind, labeled_points)
 
-# extract features and lable hem
-sat_classi <- normImage(sat)
-sat_classi <- rescaleImage(sat_classi, ymin = 0, ymax = 1)
+# preprosess sat
+sat_classi <- normImage(sat) # correct differences in radiometric values (like due to acquisition changes)
+sat_classi <- rescaleImage(sat_classi, ymin = 0, ymax = 1) # rescale the values of an image to a new range
+
+# extract features and label them with  response variable
+# features are then labeled with their corresponding response variable in a new dataframe called labeled_features
 unlabeled_features <- raster::extract(sat, labeled_points, df = T)
-unlabeled_features <- unlabeled_features[,-1]
+unlabeled_features <- unlabeled_features[,-1] # don't need ID column
 labeled_features <- cbind(
   resp_var = labeled_points$resp_var,
   unlabeled_features
 )
 
 # remove duplicates
-dupl <- duplicated(labeled_features)
-which(dupl)
-length(which(dupl)) # number of duplicates
-labeled_features <- labeled_features[!dupl,]
+dupl <- duplicated(labeled_features) #  creates a logical vector that is T for each row of  that is a duplicate of an earlier row
+which(dupl) # indices of the rows that are duplicates
+length(which(dupl)) # total number of duplicate rows
+labeled_features <- labeled_features[!dupl,] # removes the duplicate rows from by indexing. Returns all rows that are not duplicates
 
-# remove column ID
-x <- labeled_features[,2:ncol(labeled_features)]
-y <- as.factor(labeled_features$resp_var)
-levels(y) <- paste0("class_", levels(y))
+
+x <- labeled_features[,2:ncol(labeled_features)] # assigns all features to x. Features are columns except first, that's response variable
+y <- as.factor(labeled_features$resp_var) # converts response variable column to factor
+levels(y) <- paste0("class_", levels(y)) # and relabels it with class_ -> easier to read
+
 
 # fit the ranodm forest model
 model <- train(
   x = x,
   y = y,
   trControl = trainControl(
-    p = 0.75, # sample percentage
-    method  = "cv",
-    number  = 5,
+    p = 0.75, # percentage of samples used for training
+    method  = "cv", # cross validation
+    number  = 5, # 5-fold
     verboseIter = TRUE,
     classProbs = TRUE
   ),
-  method = "rf" # algorithm (random forest)
+  method = "rf" # random forest algorithm
 )
 
-# performance
+# performance metrics
 model
-confusionMatrix(model)
+confusionMatrix(model) # shows how well the model predicted the classes
 
-# prediction
-sat_class <- predict(sat, model, type='raw')
+# predict
+sat_class <- predict(sat, model, type='raw') # (raw) returns predicted probabilities for each class
 
-# save raster
+# write
 writeRaster(sat_class, filename = "flood_landcover.tif",
             datatype = "INT1U", overwrite = T)
 
@@ -325,13 +340,13 @@ pop_large <- st_read("D:/DATEN ZWEI/Wue/WS22_23/IntroductionToProgramming/Assign
 
 # reproject population data
 
-# Check the current CRS of the population file
+# Check the current CRS of the population GeoPackage file
 st_crs(pop_large)
 
 # Reproject the population GeoPackage file to match the CRS of the shapefile
 pop_large_reproj <- st_transform(pop_large, st_crs(mndwi_polygons_merged))
 
-# Check the new CRS of the population file
+# Check the new CRS of the population GeoPackage file
 st_crs(pop_large_reproj)
 
 
@@ -350,7 +365,7 @@ plot(pop_flood)
 
 
 
-# Calculate the percentage of affected people by the flood in the study area
+# Calculate the percentage of affected people with by the flood in the study area
 # the unit of the population is the number of people per square kilometer
 
 # calculate the total number of people affected by the flood
@@ -366,7 +381,7 @@ percentage_affected <- (total_affected / total_population) * 100
 
 
 
-# Visualisation of this affected population with population density
+# Visualisation of this affected population with the density
 
 # will be using rayshader so converting to matrix
 # how many columns and rows for matrix
@@ -375,6 +390,8 @@ percentage_affected <- (total_affected / total_population) * 100
 bbox <- st_bbox(pop_flood)
 
 # convert numbers of bbox to spatial point coordinates
+# convert the min & max values of  x and y coordinates of the bounding box to spatial points with st_points
+# combine points into single spatial feature collection with st_sfc with same crs as population data
 bottom_left <- st_point(c(bbox[["xmin"]], bbox[["ymin"]])) %>%
   st_sfc(crs = st_crs(pop_flood))
 
@@ -384,8 +401,8 @@ bottom_right <- st_point(c(bbox[["xmax"]], bbox[["ymin"]])) %>%
 top_left <- st_point(c(bbox[["xmin"]], bbox[["ymax"]])) %>%
   st_sfc(crs = st_crs(pop_flood))
 
+# calculate width and height
 width <- st_distance(bottom_left, bottom_right)
-
 height <- st_distance(bottom_left, top_left)
 
 # different conditions, which side is longer
@@ -398,12 +415,12 @@ if (width > height) {
   width_ratio <- width / height # when equal, this would be 1
 }
 
-# define matrix. At the moment the pop data is in a spatial format. So first convert it to a raster
+# define matrix. At the moment the pop data is in a spatial format. So first to convert it to a raster
 # (using stars) and then to a matrix
 
 # rasterize
-# width and height is important (number of cells in x and y direction) in integer numbers
-base_size <- 1000 # size of the base -> so the longer side will be the whole amount of base_size
+# width and height is important (number of cells in x and y direction) in integer numbers (=floor)
+base_size <- 1000 # size of the base -> so the longer side will be the hole amount of base_size
 pop_raster <- st_rasterize(pop_flood,
                            nx = floor(base_size * width_ratio),
                            ny = floor(base_size * height_ratio))
@@ -424,8 +441,9 @@ range(pop_mat, na.rm = TRUE)
 colpal <- met.brewer("OKeeffe2")
 swatchplot(colpal)
 
-# switch colour palette
+# with bias we can switch the colour palette
 textu <- grDevices::colorRampPalette(colpal, bias = 2)(256)
+# displaying collections of palettes
 swatchplot(textu)
 
 # plot
@@ -433,8 +451,8 @@ pop_mat %>%
   height_shade(texture = textu) %>%
   plot_3d(heightmap = pop_mat,
           zscale = 80, # zscale for height exageration -> the higher the number, the less exagerated
-          solid = FALSE, # remove base
-          shadowdepth = 0 # to remove the gap between map and shadow
+          solid = FALSE, # remove base under the hexagons
+          shadowdepth = 0 # to remove the gap between the map and the shadow
   )
 
 
@@ -457,7 +475,7 @@ render_highquality(
 pic <- image_read("pop_image.png")
 
 # first crop, to "center" it
-# in annotate we set the text parameters like size, colour (with alpha make it transparent), bold (weight)
+# in annotate we set the text parameters, like size, colour (with alpha make it transparent), bold (weight)
 # and position (gravity) (for each text field one)
 pic %>%
   image_crop(gravity = "center",
@@ -481,6 +499,9 @@ pic %>%
                  ) %>%
 
   image_write("image_git.png")
+
+
+
 
 ## just as a comment: the visualisation of the population distribution would look much nicer, if the area was larger
 ## but I chose this small area to decrease the computing time
